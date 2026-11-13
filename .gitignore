@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.env
+# 실제 할일 데이터는 ~/.claude/할일 에 있고 저장소에 넣지 않는다
+projects.json
+진행중.md
