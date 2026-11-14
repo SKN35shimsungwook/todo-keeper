@@ -9,7 +9,7 @@ description: 할일 지킴이 — 사용자(심성욱)가 시작해 놓고 잊�
 
 ## 1. 구성
 
-원본 저장소: `C:/Users/playdata2/Desktop/todo-keeper` (비공개 GitHub `SKN35shimsungwook/todo-keeper`). `~/.claude/skills/todo-keeper`는 그 폴더로 연결한 정션이므로, 고칠 때는 저장소에서 고치고 `tests/test_todo.py`를 돌린 뒤 dated-commit으로 커밋한다. 훅 경로가 바뀌면 `install.py`를 다시 실행한다.
+원본 저장소: `C:/Users/playdata2/Desktop/todo-keeper` (GitHub `SKN35shimsungwook/todo-keeper`). `~/.claude/skills/todo-keeper`는 그 폴더로 연결한 정션이므로, 고칠 때는 저장소에서 고치고 `tests/test_todo.py`를 돌린 뒤 dated-commit으로 커밋한다. 훅 경로가 바뀌면 `install.py`를 다시 실행한다.
 
 | 부분 | 위치 | 하는 일 |
 |---|---|---|
