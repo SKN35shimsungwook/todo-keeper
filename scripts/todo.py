@@ -41,7 +41,8 @@ ARCHIVE_ASK_DAYS = 30     # 보관함에 이만큼 있으면 주간 점검에서
 ACTIVE = ("진행중", "멈춤")
 SCRIPT = Path(__file__).resolve()
 RUN = f'"C:/Users/playdata2/miniconda3/python.exe" -I -X utf8 "{SCRIPT.as_posix()}"'
-BRIEF_RUN = f'"C:/Users/playdata2/miniconda3/python.exe" -I -X utf8 "{(SCRIPT.parent / "sessions.py").as_posix()}"'
+BOARD_URL = "https://claude.ai/artifact/76wGH7beH88DthTAkVz6QG"  # 사이드바에 고정한 데일리 체크리스트 (11-16)
+BRIEF_RUN =f'"C:/Users/playdata2/miniconda3/python.exe" -I -X utf8 "{(SCRIPT.parent / "sessions.py").as_posix()}"'
 
 # ---------------------------------------------------------------- 저장
 
@@ -310,6 +311,10 @@ def hook_context(db: dict, today: date, cwd: str) -> str:
             elif it.get("last_nudge") == t:
                 out.append(f"  권유 {line(it, today)} → 한 줄로 '이어갈까요?'만. 강요 금지. 이어가면 activity {it['id']}")
         out.append("  다 고르면 morning-done.")
+    if morning or weekly:
+        out.append("■ 점검을 마치면 데일리 체크리스트 페이지 " + BOARD_URL + " 도 ArtifactData batch로 갱신하세요 "
+                   "(items/<ID>의 name·status·focus·next, board/meta의 updated·note를 todo.py 원본과 똑같이; "
+                   "원본에서 빠진 항목은 delete; 기존 문서는 list로 version을 읽고 if_version). 페이지를 새로 만들지 않습니다.")
     if weekly:
         out.append("■ 이번 주 주간 점검을 아직 안 했습니다. 아침 점검 뒤 'weekly' 명령 결과로 5단계(요약·진행중·보관함·아이디어함·집중)를 "
                    "5분 안에 진행하고 weekly-done. 아이디어함·보관함 항목도 고르게 하기 전에 아침 점검처럼 브리핑부터. "
