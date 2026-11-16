@@ -23,8 +23,8 @@ class Todo:
         r = subprocess.run(cmd, input=stdin, capture_output=True, text=True, encoding="utf-8")
         return (r.stdout + r.stderr).strip()
 
-    def hook(self, today: str, cwd: str = "C:/x", git: bool = False) -> str:
-        out = self.run("hook-start", today=today, git=git, stdin=json.dumps({"cwd": cwd}))
+    def hook(self, today: str, cwd: str = "C:/x", git: bool = False, session: str = "") -> str:
+        out = self.run("hook-start", today=today, git=git, stdin=json.dumps({"cwd": cwd, "session_id": session}))
         return json.loads(out)["hookSpecificOutput"]["additionalContext"] if out else ""
 
     def status(self, iid: int = 1) -> dict:
@@ -66,6 +66,14 @@ class Scenarios(unittest.TestCase):
     def test_weekly_asks_guide_edition(self):
         self.t.run("candidate", "--name", "A", today="2026-11-13")
         self.assertIn("정리 안내서", self.t.hook("2026-11-16"))
+
+    def test_check_only_in_check_session(self):
+        self.t.run("candidate", "--name", "A", today="2026-11-13")
+        self.t.run("check-session", "home-1", today="2026-11-13")
+        other = self.t.hook("2026-11-14", session="other-2")
+        self.assertNotIn("아침 점검을 아직", other)
+        self.assertIn("할일 점검 대화창", other)
+        self.assertIn("아침 점검을 아직", self.t.hook("2026-11-14", session="home-1"))
 
     def test_morning_skip(self):
         self.t.run("candidate", "--name", "A", today="2026-11-13")

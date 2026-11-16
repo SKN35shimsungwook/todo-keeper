@@ -18,6 +18,7 @@
   focus ID [ID...]           이번 주 집중 (주간 점검에서)
   morning-done [--skip]      아침 점검 끝 표시
   weekly-done                주간 점검 끝 표시
+  check-session [ID]         아침·주간 점검을 띄울 대화창(세션 id) 지정, 빈 값이면 어디서나
   list [--all]               목록
   weekly                     주간 점검 자료 (지난주 요약 + 정리할 목록)
   brief                      skill-scout 아침 디스코드 알림용 짧은 글
@@ -286,7 +287,7 @@ def brief_text(db: dict, today: date) -> str:
     return "\n".join(out)
 
 
-def hook_context(db: dict, today: date, cwd: str) -> str:
+def hook_context(db: dict, today: date, cwd: str, session_id: str = "") -> str:
     t = today.isoformat()
     meta = db.get("meta", {})
     cands = [it for it in by(db, "후보") if it["created"] < t]  # 오늘 적은 후보는 다음 날 아침에
@@ -296,6 +297,12 @@ def hook_context(db: dict, today: date, cwd: str) -> str:
     weekly = meta.get("weekly_check_week") != week_monday(today) and db["items"]
 
     out = ["[할일 지킴이] (todo-keeper 스킬 규칙. 명령: " + RUN + " <명령>)"]
+    home = meta.get("check_session")  # 점검은 이 대화창에서만 (11-16 사용자 요청)
+    if home and session_id and session_id != home and (morning or weekly):
+        out.append("■ 오늘 " + ("아침·주간" if morning and weekly else "아침" if morning else "주간") +
+                   " 점검은 아직이지만 '할일 점검' 대화창에서 합니다. 여기서는 점검을 시작하지 말고 요청만 처리하세요. "
+                   "답 끝에 '오늘 점검은 할일 점검 대화창에서 하세요' 한 줄만 붙입니다. 사용자가 여기서 하자고 하면 해도 됩니다.")
+        morning = weekly = False
     if morning:
         out.append("■ 오늘 아침 점검을 아직 안 했습니다. 사용자의 첫 요청에 답할 때 아침 점검부터 합니다. "
                    "사용자는 이름만 보고는 무슨 일인지 기억하지 못하므로, 고르게 하기 전에 반드시 브리핑부터 보여 주세요: "
@@ -369,7 +376,14 @@ def main() -> None:
         if not db["items"]:
             return
         print(json.dumps({"hookSpecificOutput": {"hookEventName": "SessionStart",
-                                                 "additionalContext": hook_context(db, today, cwd)}}, ensure_ascii=False))
+                                                 "additionalContext": hook_context(db, today, cwd, payload.get("session_id") or "")}}, ensure_ascii=False))
+        return
+
+    if a.cmd == "check-session":
+        sid = (a.ids or [""])[0]
+        db.setdefault("meta", {})["check_session"] = sid or None
+        save(d, db, today)
+        print("점검 대화창: " + (sid or "지정 안 함 (어디서나 점검)"))
         return
 
     if a.cmd == "candidate":
