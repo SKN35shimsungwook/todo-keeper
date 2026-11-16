@@ -60,6 +60,11 @@ class Scenarios(unittest.TestCase):
         self.assertIn("브리핑부터", ctx)
         self.assertIn("sessions.py", ctx)
         self.assertIn("데일리 체크리스트", ctx)
+        self.assertIn("history/", ctx)
+
+    def test_weekly_asks_guide_edition(self):
+        self.t.run("candidate", "--name", "A", today="2026-11-13")
+        self.assertIn("정리 안내서", self.t.hook("2026-11-16"))
 
     def test_morning_skip(self):
         self.t.run("candidate", "--name", "A", today="2026-11-13")
