@@ -54,6 +54,12 @@ class Scenarios(unittest.TestCase):
         self.assertNotIn("후보 #1", self.t.hook("2026-11-13"))
         self.assertIn("후보 #1 A", self.t.hook("2026-11-14"))
 
+    def test_morning_asks_briefing_first(self):
+        self.t.run("candidate", "--name", "A", today="2026-11-13")
+        ctx = self.t.hook("2026-11-14")
+        self.assertIn("브리핑부터", ctx)
+        self.assertIn("sessions.py", ctx)
+
     def test_morning_skip(self):
         self.t.run("candidate", "--name", "A", today="2026-11-13")
         self.t.run("morning-done", "--skip", today="2026-11-14")

@@ -41,6 +41,7 @@ ARCHIVE_ASK_DAYS = 30     # 보관함에 이만큼 있으면 주간 점검에서
 ACTIVE = ("진행중", "멈춤")
 SCRIPT = Path(__file__).resolve()
 RUN = f'"C:/Users/playdata2/miniconda3/python.exe" -I -X utf8 "{SCRIPT.as_posix()}"'
+BRIEF_RUN = f'"C:/Users/playdata2/miniconda3/python.exe" -I -X utf8 "{(SCRIPT.parent / "sessions.py").as_posix()}"'
 
 # ---------------------------------------------------------------- 저장
 
@@ -294,8 +295,12 @@ def hook_context(db: dict, today: date, cwd: str) -> str:
 
     out = ["[할일 지킴이] (todo-keeper 스킬 규칙. 명령: " + RUN + " <명령>)"]
     if morning:
-        out.append("■ 오늘 아침 점검을 아직 안 했습니다. 사용자의 첫 요청에 답할 때, 먼저 아래를 짧게 보여 주고 고르게 하세요 "
-                   "(AskUserQuestion 가능). 사용자가 '나중에'라고 하면 morning-done --skip 후 바로 요청을 처리합니다.")
+        out.append("■ 오늘 아침 점검을 아직 안 했습니다. 사용자의 첫 요청에 답할 때 아침 점검부터 합니다. "
+                   "사용자는 이름만 보고는 무슨 일인지 기억하지 못하므로, 고르게 하기 전에 반드시 브리핑부터 보여 주세요: "
+                   "항목마다 관련 대화창 링크, 마지막에 정한 일, 새 요청에 밀려 묻힌 요청을 표로 정리합니다 "
+                   "(대화 찾기: " + BRIEF_RUN + " --days 14 --out <스크래치패드>/brief.txt, 하나만 찾을 땐 --grep 이름; "
+                   "링크는 list_sessions의 local_ id). 브리핑 뒤에 고르게 하고(AskUserQuestion 가능), "
+                   "사용자가 '나중에'라고 하면 morning-done --skip 후 바로 요청을 처리합니다.")
         for it in cands:
             out.append(f"  후보 {line(it, today)} → choose {it['id']} 진행중|아이디어|버림")
         for it in stalled:
@@ -307,7 +312,8 @@ def hook_context(db: dict, today: date, cwd: str) -> str:
         out.append("  다 고르면 morning-done.")
     if weekly:
         out.append("■ 이번 주 주간 점검을 아직 안 했습니다. 아침 점검 뒤 'weekly' 명령 결과로 5단계(요약·진행중·보관함·아이디어함·집중)를 "
-                   "5분 안에 진행하고 weekly-done. 사용자가 미루면 다음 대화에서 다시.")
+                   "5분 안에 진행하고 weekly-done. 아이디어함·보관함 항목도 고르게 하기 전에 아침 점검처럼 브리핑부터. "
+                   "사용자가 미루면 다음 대화에서 다시.")
     if here:
         out.append("■ 지금 폴더는 진행중 프로젝트입니다: " + "; ".join(line(it, today) for it in here))
     active = by(db, "진행중")
