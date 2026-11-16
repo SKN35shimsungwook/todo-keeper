@@ -61,6 +61,7 @@ class Scenarios(unittest.TestCase):
         self.assertIn("sessions.py", ctx)
         self.assertIn("데일리 체크리스트", ctx)
         self.assertIn("history/", ctx)
+        self.assertIn("그림", ctx)
 
     def test_weekly_asks_guide_edition(self):
         self.t.run("candidate", "--name", "A", today="2026-11-13")

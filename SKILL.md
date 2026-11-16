@@ -48,13 +48,14 @@ description: 할일 지킴이 — 사용자(심성욱)가 시작해 놓고 잊�
 - 항목마다 표 한 줄에 **관련 대화창 링크**(`list_sessions`의 `local_` id로 `[제목](#local_…)`), **마지막에 정한 일 / 어디서 멈췄나**, **새 요청에 밀려 묻힌 요청**을 쓴다.
 - 브리핑하다 목록에 없는 묻힌 요청을 찾으면 `candidate`로 더하고 표에 "(묻힌 일)"이라고 표시한다.
 - 끝난 것으로 본 일은 한 줄로 따로 적는다 (사용자가 틀렸다고 하면 바로잡을 수 있게).
+- **그림을 같이 보여 준다 (11-16 사용자 요청)**: 브리핑·점검 결과·끝나면 알려 줄 것에는 글과 함께 그림 하나 이상을 붙인다. 대화에서는 `mcp__visualize__show_widget`으로 칸반(집중 / 진행중 / 멈춤 / 아이디어함 / 직접 할 일)과 상태 흐름(후보 → 진행중 → 멈춤 → 보관)을 그리고, 쓸 수 없으면 mermaid 블록이나 표로 대신한다. 정리 안내서 새 판에도 `open`(하다 만 일 칸)과 `diagrams`(mermaid 그림)를 넣는다.
 
 **아침 점검 (그날 첫 대화)** — 훅 문맥에 "아침 점검을 아직 안 했습니다"가 있으면 사용자의 첫 요청에 답하면서 위 브리핑부터 보여 준다. 후보마다 진행중/아이디어/버림을 고르게 하고(AskUserQuestion이 편함) `choose`, 멈춤 권유는 한 줄로 "이어갈까요?"만 묻는다. 끝나면 `morning-done`, 사용자가 미루면 `morning-done --skip` 후 바로 원래 요청을 한다. 권유 횟수는 훅이 하루 한 번 자동으로 센다.
 
 **데일리 체크리스트 갱신 (11-16 추가)** — 사이드바에 고정한 체크리스트 페이지 https://claude.ai/artifact/76wGH7beH88DthTAkVz6QG 가 진행중·집중·아이디어함을 보여 준다. 아침·주간 점검이 끝나거나 항목 상태·다음 한 걸음·집중이 바뀌면, `ArtifactData` batch로 `items/<ID>`(`name`, `status`, `focus`, `next`)와 `board/meta`(`updated`, `note`)를 todo.py 원본과 똑같이 맞춘다. 원본에서 빠진 항목(완료·버림)은 `items`에서 delete한다. 기존 문서는 먼저 list로 version을 읽고 `if_version`을 붙인다. 체크(`checks/<날짜>`)는 사용자가 페이지에서 하는 것이라 Claude가 쓰지 않고, todo-keeper의 활동으로도 세지 않는다. 같은 때 `history/<오늘 날짜>` = `{date, by:"claude", items:[진행중 항목의 id·name·focus·next]}`도 써 둔다. 페이지 맨 아래 '지난 기록'이 이것과 `checks/<날짜>`를 합쳐 주차 → 날짜로 보여 준다 (사용자가 체크했는데 그날 기록이 없으면 페이지가 직접 만든다).
 
 **정리 안내서 새 판 (11-16 추가)** — 사이드바에 둔 안내서 https://claude.ai/artifact/TbTG9mU3USHopWdcc88Tt5 는 판마다 기록이 쌓인다. 주간 점검을 마쳤을 때, 또는 대화창·그룹·스킬을 크게 정리한 날 `ArtifactData` set으로 `editions/<날짜>` 문서 하나를 새로 만든다 (같은 날 두 번이면 `<날짜>-2`). 지난 판은 지우지 않는다. 페이지를 새로 만들지 않는다.
-- 형식: `{date, title, where, lead, summary:[{k,t}], sidebar:[{h, rows:[{t, pin?, child?, folder?}]}], hubs:[{topic, where, group, todo?, todoWarn?}], hubsNote?, howto:[{h, steps:[…]}], todo:{stats:[{n,t}], notes:[{k,t}]}, warn:[…]}`. 빈 절은 빼도 된다. 글 안의 `[글자](https://…)`만 링크가 된다.
+- 형식: `{date, title, where, lead, summary:[{k,t}], open:[{h, kind?('focus'|'me'), sub?, items:[{id?, name, next?}]}], diagrams:[{title, caption, mmd}], sidebar:[{h, rows:[{t, pin?, child?, folder?}]}], hubs:[{topic, where, group, todo?, todoWarn?}], hubsNote?, howto:[{h, steps:[…]}], todo:{stats:[{n,t}], notes:[{k,t}]}, warn:[…]}`. 빈 절은 빼도 된다. 글 안의 `[글자](https://…)`만 링크가 된다.
 - 내용: 그 주에 바뀐 것, 지금 사이드바 모습, 통합 세션 위치, 꺼내는 법, 할일 지킴이 숫자, 사용자가 직접 확인할 것. 사용자가 이해하기 쉬운 말로 쓴다.
 
 **주간 점검 (그 주 첫 대화, 보통 월요일)** — `weekly` 결과로 5단계를 5분 안에: ① 지난주 요약(보여 주기만) ② 진행중·멈춤 이어갈지/보관 ③ 보관함 꺼낼지(`restore`)/유지/버림(`drop`) ④ 아이디어함에서 올릴 것(`choose ID 진행중`) ⑤ 이번 주 집중 1~2개(`focus`). ②~④에서 고르게 하기 전에도 브리핑을 먼저 보여 준다. 그날 아침 점검에서 이미 브리핑하고 골랐다면 ②·④는 건너뛰고 ⑤만 한다. 끝나면 `weekly-done`.

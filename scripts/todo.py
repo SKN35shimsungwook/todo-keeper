@@ -301,7 +301,8 @@ def hook_context(db: dict, today: date, cwd: str) -> str:
                    "사용자는 이름만 보고는 무슨 일인지 기억하지 못하므로, 고르게 하기 전에 반드시 브리핑부터 보여 주세요: "
                    "항목마다 관련 대화창 링크, 마지막에 정한 일, 새 요청에 밀려 묻힌 요청을 표로 정리합니다 "
                    "(대화 찾기: " + BRIEF_RUN + " --days 14 --out <스크래치패드>/brief.txt, 하나만 찾을 땐 --grep 이름; "
-                   "링크는 list_sessions의 local_ id). 브리핑 뒤에 고르게 하고(AskUserQuestion 가능), "
+                   "링크는 list_sessions의 local_ id). 브리핑에는 글과 함께 그림(show_widget 칸반·상태 흐름, 안 되면 mermaid)을 붙입니다. "
+                   "브리핑 뒤에 고르게 하고(AskUserQuestion 가능), "
                    "사용자가 '나중에'라고 하면 morning-done --skip 후 바로 요청을 처리합니다.")
         for it in cands:
             out.append(f"  후보 {line(it, today)} → choose {it['id']} 진행중|아이디어|버림")
